@@ -3,18 +3,18 @@
 CREATE TABLE IF NOT EXISTS "Users" (
                          user_id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
                          username varchar(255) NOT NULL UNIQUE,
-                         isu_id integer NOT NULL UNIQUE,
-                         role_id integer DEFAULT NULL,
+                         isu_id integer NULL UNIQUE,
+                         permissions integer NOT NULL DEFAULT 1, -- permissions is sum of roles id -- TODO Maybe future problem with max int postgres (31 roles) but it looks pretty nice as for me if change to bigint
                          password varchar(255) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS  "Roles" (
-                         role_id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+CREATE TABLE IF NOT EXISTS "Roles" (
+                         role_id integer PRIMARY KEY,
                          name varchar(255) NOT NULL UNIQUE,
                          description text NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS  "Comments" (
+CREATE TABLE IF NOT EXISTS "Comments" (
                             comment_id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
                             thread_id integer NOT NULL,
                             title varchar(255),
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS  "Replies" (
 CREATE TABLE IF NOT EXISTS  "Threads" (
                            thread_id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
                            topic_id integer NOT NULL,
-                           init_comment_id integer NOT NULL,
+                           init_comment_id integer NULL,
                            popularity INTEGER NOT NULL DEFAULT 0
 );
 
@@ -109,11 +109,6 @@ CREATE TABLE IF NOT EXISTS  "Captcha" (
 /* constraints */
 
 /* Users */
-
-ALTER TABLE "Users"
-    ADD FOREIGN KEY (role_id)
-        REFERENCES "Roles" (role_id)
-        ON DELETE RESTRICT;
 
 ALTER TABLE "Users" DROP CONSTRAINT IF EXISTS "username_minimal_length";
 ALTER TABLE "Users"
@@ -372,7 +367,7 @@ CREATE OR REPLACE TRIGGER  trash_insert_comment_trigger
 
 /* indicies */
 
-CREATE INDEX "Users_isu_index" ON "Users" USING btree(isu_id); -- number
+/*CREATE INDEX "Users_isu_index" ON "Users" USING btree(isu_id); -- number
 -- CREATE INDEX "Users_role_index" ON "Users" USING hash(role); -- TOO SMALL
 CREATE INDEX "Users_username_substring_index" ON "Users" USING GIN(username); -- search text through names, never joins
 CREATE INDEX "Users_username_index" ON "Users" USING hash(username);
@@ -391,3 +386,4 @@ CREATE INDEX "Polls_comment_id_index" ON "Polls" USING hash(comment_id);
 
 CREATE INDEX "Trash_comment_id_index" ON "Trash" USING btree(comment_id); -- number
 CREATE INDEX "Trash_recycle_date_index" ON "Trash" USING btree(recycle_date); -- for filterings
+*/
